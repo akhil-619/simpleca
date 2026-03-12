@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SimpleCA | Tools for Chartered Accountants</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #f4f7f6; color: #333; margin: 0; padding: 20px; }
+        .container { max-width: 800px; margin: 0 auto; text-align: center; }
+        h1 { font-size: 36px; color: #2c3e50; margin-bottom: 10px; }
+        p { font-size: 18px; color: #7f8c8d; margin-bottom: 40px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
+        .card { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-decoration: none; color: inherit; transition: transform 0.2s, box-shadow 0.2s; }
+        .card:hover { transform: translateY(-5px); box-shadow: 0 6px 12px rgba(0,0,0,0.15); }
+        .card h2 { margin: 0 0 10px; font-size: 20px; color: #3498db; }
+        .card p { font-size: 14px; margin: 0; color: #555; }
+        .card.tax h2 { color: #e74c3c; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>SimpleCA</h1>
+        <p>100% private, client-side tools for Indian Chartered Accountants.</p>
+        
+        <div class="grid">
+            <a href="tax-calculator.html" class="card tax">
+                <h2>Old vs New Tax Regime</h2>
+                <p>Instantly compare the tax liability under both regimes with the latest budget rules.</p>
+            </a>
+            <a href="gst-calculator.html" class="card">
+                <h2>GST Calculator</h2>
+                <p>Easily calculate forward GST or extract reverse GST from any total amount.</p>
+            </a>
+        </div>
+    </div>
+</body>
+</html>

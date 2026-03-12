@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tax Regime Calculator | SimpleCA</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #f4f7f6; color: #333; margin: 0; padding: 20px; }
+        .container { max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        h1 { font-size: 24px; text-align: center; color: #2c3e50; }
+        label { display: block; margin: 15px 0 5px; font-weight: bold; }
+        input, button { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 16px; }
+        button { background: #e74c3c; color: white; border: none; cursor: pointer; margin-top: 20px; font-weight: bold; }
+        button:hover { background: #c0392b; }
+        .grid { display: flex; gap: 20px; margin-top: 20px; }
+        .card { flex: 1; padding: 15px; background: #ecf0f1; border-radius: 4px; text-align: center; }
+        .card h2 { margin: 0 0 10px; font-size: 18px; color: #2c3e50; }
+        .card .amount { font-size: 24px; font-weight: bold; color: #e74c3c; }
+        .winner { background: #d4efdf; border: 2px solid #2ecc71; }
+        .winner .amount { color: #27ae60; }
+        .back-link { display: block; text-align: center; margin-top: 20px; color: #e74c3c; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Old vs. New Tax Regime Calculator</h1>
+        
+        <label for="income">Gross Total Income (₹)</label>
+        <input type="number" id="income" placeholder="e.g. 1500000" min="0">
+
+        <label for="deductions">Section 80C Deductions (₹)</label>
+        <input type="number" id="deductions" placeholder="Max ₹1,50,000" min="0">
+
+        <label for="hra">HRA Exemption (₹)</label>
+        <input type="number" id="hra" placeholder="e.g. 100000" min="0">
+
+        <button onclick="calculateTax()">Compare Regimes</button>
+
+        <div class="grid" id="resultGrid" style="display:none;">
+            <div class="card" id="cardOld">
+                <h2>Old Regime</h2>
+                <div class="amount" id="taxOld">₹0</div>
+            </div>
+            <div class="card" id="cardNew">
+                <h2>New Regime</h2>
+                <div class="amount" id="taxNew">₹0</div>
+            </div>
+        </div>
+        
+        <a href="index.html" class="back-link">← Back to Tools</a>
+    </div>
+
+    <script>
+        // Simple 2024-25 / AY 2025-26 rules (Approximate for comparison)
+        function calculateOldRegime(income, deductions, hra) {
+            let taxable = income - 50000 - deductions - hra; // 50k Standard Deduction
+            if (taxable <= 500000) return 0; // Section 87A rebate
+            
+            let tax = 0;
+            if (taxable > 250000 && taxable <= 500000) tax += (taxable - 250000) * 0.05;
+            if (taxable > 500000 && taxable <= 1000000) tax += 12500 + (taxable - 500000) * 0.20;
+            if (taxable > 1000000) tax += 112500 + (taxable - 1000000) * 0.30;
+            
+            return tax * 1.04; // 4% Health & Education Cess
+        }
+
+        function calculateNewRegime(income) {
+            let taxable = income - 75000; // 75k Standard Deduction for new regime (Budget 2024)
+            if (taxable <= 700000) return 0; // Section 87A rebate
+            
+            let tax = 0;
+            if (taxable > 300000 && taxable <= 700000) tax += (taxable - 300000) * 0.05;
+            if (taxable > 700000 && taxable <= 1000000) tax += 20000 + (taxable - 700000) * 0.10;
+            if (taxable > 1000000 && taxable <= 1200000) tax += 50000 + (taxable - 1000000) * 0.15;
+            if (taxable > 1200000 && taxable <= 1500000) tax += 80000 + (taxable - 1200000) * 0.20;
+            if (taxable > 1500000) tax += 140000 + (taxable - 1500000) * 0.30;
+            
+            return tax * 1.04; // 4% Cess
+        }
+
+        function calculateTax() {
+            const income = parseFloat(document.getElementById('income').value) || 0;
+            const deductions = Math.min(parseFloat(document.getElementById('deductions').value) || 0, 150000);
+            const hra = parseFloat(document.getElementById('hra').value) || 0;
+
+            if (income <= 0) return alert('Please enter your income.');
+
+            const oldTax = calculateOldRegime(income, deductions, hra);
+            const newTax = calculateNewRegime(income);
+
+            document.getElementById('taxOld').innerText = `₹${Math.round(oldTax).toLocaleString()}`;
+            document.getElementById('taxNew').innerText = `₹${Math.round(newTax).toLocaleString()}`;
+            
+            document.getElementById('cardOld').classList.remove('winner');
+            document.getElementById('cardNew').classList.remove('winner');
+            
+            if (oldTax < newTax) {
+                document.getElementById('cardOld').classList.add('winner');
+            } else if (newTax < oldTax) {
+                document.getElementById('cardNew').classList.add('winner');
+            }
+            
+            document.getElementById('resultGrid').style.display = 'flex';
+        }
+    </script>
+</body>
+</html>

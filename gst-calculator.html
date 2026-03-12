@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GST Calculator | SimpleCA</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #f4f7f6; color: #333; margin: 0; padding: 20px; }
+        .container { max-width: 500px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        h1 { font-size: 24px; text-align: center; color: #2c3e50; }
+        label { display: block; margin: 15px 0 5px; font-weight: bold; }
+        input, select, button { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 16px; }
+        .radio-group { display: flex; gap: 20px; margin-bottom: 20px; }
+        .radio-group label { font-weight: normal; margin: 0; display: flex; align-items: center; gap: 5px; }
+        button { background: #3498db; color: white; border: none; cursor: pointer; margin-top: 20px; font-weight: bold; }
+        button:hover { background: #2980b9; }
+        .result { margin-top: 20px; padding: 15px; background: #ecf0f1; border-radius: 4px; }
+        .result div { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 16px; }
+        .result .total { font-weight: bold; border-top: 1px solid #bdc3c7; padding-top: 8px; font-size: 18px; color: #e74c3c; }
+        .back-link { display: block; text-align: center; margin-top: 20px; color: #3498db; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>GST Calculator</h1>
+        
+        <div class="radio-group">
+            <label><input type="radio" name="calcType" value="add" checked> Add GST</label>
+            <label><input type="radio" name="calcType" value="extract"> Extract GST</label>
+        </div>
+
+        <label for="amount">Amount (₹)</label>
+        <input type="number" id="amount" placeholder="e.g. 10000" min="0">
+
+        <label for="rate">GST Rate (%)</label>
+        <select id="rate">
+            <option value="5">5%</option>
+            <option value="12">12%</option>
+            <option value="18" selected>18%</option>
+            <option value="28">28%</option>
+        </select>
+
+        <button onclick="calculateGST()">Calculate</button>
+
+        <div class="result" id="resultBlock" style="display:none;">
+            <div><span>Base Amount:</span> <span id="resBase">₹0</span></div>
+            <div><span>CGST:</span> <span id="resCGST">₹0</span></div>
+            <div><span>SGST:</span> <span id="resSGST">₹0</span></div>
+            <div class="total"><span>Total Amount:</span> <span id="resTotal">₹0</span></div>
+        </div>
+        
+        <a href="index.html" class="back-link">← Back to Tools</a>
+    </div>
+
+    <script>
+        function calculateGST() {
+            const amount = parseFloat(document.getElementById('amount').value);
+            const rate = parseFloat(document.getElementById('rate').value);
+            const calcType = document.querySelector('input[name="calcType"]:checked').value;
+            
+            if (isNaN(amount) || amount <= 0) return alert('Please enter a valid amount.');
+
+            let base, total, gstAmount;
+
+            if (calcType === 'add') {
+                base = amount;
+                gstAmount = base * (rate / 100);
+                total = base + gstAmount;
+            } else {
+                total = amount;
+                base = total / (1 + (rate / 100));
+                gstAmount = total - base;
+            }
+
+            const cgst = gstAmount / 2;
+            const sgst = gstAmount / 2;
+
+            document.getElementById('resBase').innerText = `₹${base.toFixed(2)}`;
+            document.getElementById('resCGST').innerText = `₹${cgst.toFixed(2)}`;
+            document.getElementById('resSGST').innerText = `₹${sgst.toFixed(2)}`;
+            document.getElementById('resTotal').innerText = `₹${total.toFixed(2)}`;
+            
+            document.getElementById('resultBlock').style.display = 'block';
+        }
+    </script>
+</body>
+</html>
