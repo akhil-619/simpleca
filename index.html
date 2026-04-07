@@ -1,37 +1,326 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SimpleCA | Tools for Chartered Accountants</title>
-    <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #f4f7f6; color: #333; margin: 0; padding: 20px; }
-        .container { max-width: 800px; margin: 0 auto; text-align: center; }
-        h1 { font-size: 36px; color: #2c3e50; margin-bottom: 10px; }
-        p { font-size: 18px; color: #7f8c8d; margin-bottom: 40px; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
-        .card { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-decoration: none; color: inherit; transition: transform 0.2s, box-shadow 0.2s; }
-        .card:hover { transform: translateY(-5px); box-shadow: 0 6px 12px rgba(0,0,0,0.15); }
-        .card h2 { margin: 0 0 10px; font-size: 20px; color: #3498db; }
-        .card p { font-size: 14px; margin: 0; color: #555; }
-        .card.tax h2 { color: #e74c3c; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Note Architect Pro</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink:    #1a1a2e;
+    --paper:  #faf7f2;
+    --cream:  #f0ebe0;
+    --rule:   #e8e0d0;
+    --accent: #c8502a;
+    --blue:   #2c5f8a;
+    --muted:  #8a8070;
+    --surface:#ffffff;
+    --nav-h:  64px;
+    --tab-h:  56px;
+  }
+  
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; overflow: hidden; }
+  body {
+    font-family: 'Syne', sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+  }
+
+  /* ── NAVIGATION ── */
+  #topnav { height: var(--nav-h); background: var(--ink); display: flex; align-items: center; justify-content: space-between; padding: 0 32px; flex-shrink: 0; z-index: 100; }
+  #topnav .wordmark { font-family: 'Instrument Serif', serif; font-size: 26px; color: var(--paper); cursor: default; }
+  #topnav .wordmark span { color: var(--accent); font-style: italic; }
+  
+  #folder-btn { display: flex; align-items: center; gap: 8px; padding: 8px 18px; background: transparent; border: 1.5px solid rgba(255,255,255,0.25); border-radius: 8px; color: rgba(255,255,255,0.8); font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; transition: all .2s; }
+  #folder-btn.linked { border-color: #4ade80; color: #4ade80; }
+
+  #tabs { height: var(--tab-h); background: var(--surface); border-bottom: 2px solid var(--rule); display: flex; justify-content: center; flex-shrink: 0; }
+  .tab { flex: 1; max-width: 180px; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: .8px; color: var(--muted); cursor: pointer; border-bottom: 3px solid transparent; transition: all .2s; }
+  .tab.on { color: var(--accent); border-bottom-color: var(--accent); }
+
+  /* ── SCREENS ── */
+  #screens { flex: 1; overflow-y: auto; overflow-x: hidden; position: relative; background: var(--paper); }
+  .screen { display: none; max-width: 840px; margin: 0 auto; padding: 40px 24px 80px; }
+  .screen.on { display: block; }
+  
+  .card { background: var(--surface); border: 1.5px solid var(--rule); border-radius: 14px; padding: 24px; margin-bottom: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.02); }
+  .field { margin-bottom: 18px; }
+  .field label { font-size: 11px; font-weight: 800; text-transform: uppercase; color: var(--muted); display: block; margin-bottom: 8px; }
+  .field input, .field textarea, .field select { width: 100%; padding: 14px; border: 1.5px solid var(--rule); border-radius: 10px; font-family: 'Syne', sans-serif; font-size: 15px; background: var(--paper); outline: none; }
+  .field textarea { font-family: 'JetBrains Mono', monospace; font-size: 13px; min-height: 350px; }
+
+  .btn-primary { width: 100%; padding: 16px; background: var(--accent); color: #fff; border: none; border-radius: 12px; font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; cursor: pointer; transition: 0.2s; margin-bottom: 10px; }
+  .btn-primary:active { transform: scale(0.98); }
+  .btn-secondary { width: 100%; padding: 14px; background: var(--ink); color: #fff; border: none; border-radius: 12px; font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; cursor: pointer; transition: 0.2s; }
+  .btn-secondary:disabled { background: #d3ccc0; cursor: not-allowed; }
+
+  /* ── LIBRARY (localStorage based) ── */
+  .note-item { display: flex; align-items: center; padding: 14px; background: var(--surface); border: 1px solid var(--rule); border-radius: 10px; margin-bottom: 8px; cursor: pointer; transition: 0.2s; }
+  .note-item:hover { border-color: var(--accent); }
+  .note-name { font-weight: 600; flex: 1; }
+  .delete-btn { background: none; border: none; color: #e53e3e; cursor: pointer; font-size: 18px; padding: 4px 8px; }
+
+  /* ── PRINT & PDF PREVIEW ── */
+  #print-render { background: #d1d1d1; padding: 40px 0; display: none; flex-direction: column; align-items: center; gap: 20px; }
+  .a4-page { background: white; width: 210mm; min-height: 297mm; padding: 20mm; box-shadow: 0 0 20px rgba(0,0,0,0.15); position: relative; overflow: hidden; }
+
+  /* ── PRINT STYLES (THE PDF ENGINE) ── */
+  @media print {
+    @page { size: A4; margin: 0; }
+    body { background: white; height: auto; overflow: visible; }
+    #topnav, #tabs, #print-controls, .section-title, .btn-primary, .btn-secondary, .card { display: none !important; }
+    #screens { overflow: visible !important; position: static !important; display: block !important; }
+    .screen { max-width: 100% !important; padding: 0 !important; margin: 0 !important; display: none; }
+    #screen-print { display: block !important; }
+    #print-render { display: block !important; background: transparent !important; padding: 0 !important; }
+    .a4-page { box-shadow: none !important; width: 100% !important; margin: 0 !important; page-break-after: always; border: none !important; }
+  }
+
+  .toast { position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--ink); color: #fff; padding: 14px 28px; border-radius: 30px; transition: 0.3s; z-index: 999; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+</style>
 </head>
 <body>
-    <div class="container">
-        <h1>SimpleCA</h1>
-        <p>100% private, client-side tools for Indian Chartered Accountants.</p>
-        
-        <div class="grid">
-            <a href="tax-calculator.html" class="card tax">
-                <h2>Old vs New Tax Regime</h2>
-                <p>Instantly compare the tax liability under both regimes with the latest budget rules.</p>
-            </a>
-            <a href="gst-calculator.html" class="card">
-                <h2>GST Calculator</h2>
-                <p>Easily calculate forward GST or extract reverse GST from any total amount.</p>
-            </a>
+
+<div id="topnav">
+  <div class="wordmark">Note<span>Architect</span></div>
+  <button id="folder-btn" onclick="handleFolderClick()">📁 Connect Folder</button>
+</div>
+
+<div id="tabs">
+  <div class="tab on" id="tab-add" onclick="showTab('add')">✏️ Add</div>
+  <div class="tab" id="tab-lib" onclick="showTab('lib')">📚 Library</div>
+  <div class="tab" id="tab-view" onclick="showTab('view')" style="display:none">👁️ View</div>
+  <div class="tab" id="tab-print" onclick="showTab('print')">🖨️ PDF</div>
+</div>
+
+<div id="screens">
+  <!-- ADD SCREEN -->
+  <div class="screen on" id="screen-add">
+    <div class="card">
+      <div class="field">
+        <label>Code from AI Studio</label>
+        <textarea id="in-code" placeholder="Paste the <style> and <div> snippet here..."></textarea>
+      </div>
+      
+      <!-- Primary Action: Direct PDF (Clean) -->
+      <button class="btn-primary" onclick="directDownloadPDF()">Download PDF Now</button>
+      
+      <!-- Desktop Only: Save to Cloud/Folder -->
+      <div style="margin-top: 30px; border-top: 2px solid var(--paper); padding-top: 20px;">
+        <p style="font-size: 11px; color: var(--muted); margin-bottom: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">Archive to Local Folder (Desktop Only)</p>
+        <div class="field"><label>Subject</label><input type="text" id="in-sub" list="dl-sub" oninput="loadChaps()"></div>
+        <div class="field"><label>Chapter</label><input type="text" id="in-chap" list="dl-chap"></div>
+        <div class="field"><label>Note Title</label><input type="text" id="in-title" placeholder="Problem Name"></div>
+        <button class="btn-secondary" id="btn-save" onclick="saveNote()" disabled>Save to Library</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- LIBRARY SCREEN -->
+  <div class="screen" id="screen-lib"><div id="lib-content"></div></div>
+
+  <!-- VIEW SCREEN -->
+  <div class="screen" id="screen-view">
+    <button onclick="showTab('lib')" style="margin-bottom:15px; cursor:pointer; background:none; border:none; color:var(--blue); font-weight:bold; font-family:'Syne';">← Back to Library</button>
+    <div id="view-content" class="card"></div>
+  </div>
+
+  <!-- PRINT SCREEN -->
+  <div class="screen" id="screen-print">
+    <div id="print-controls">
+        <div class="card">
+            <h3 style="margin-bottom:15px; font-size:14px; text-transform:uppercase; letter-spacing:1px;">Batch Print</h3>
+            <div class="field"><label>Select Subject</label><select id="pr-sub" onchange="loadPrChaps()"></select></div>
+            <div class="field"><label>Select Chapter</label><select id="pr-chap"></select></div>
+            <button class="btn-primary" onclick="buildPrint()">Generate Preview</button>
+            <button class="btn-secondary" onclick="window.print()">Print / Save PDF</button>
         </div>
     </div>
+    <div id="print-render"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<datalist id="dl-sub"></datalist>
+<datalist id="dl-chap"></datalist>
+
+<script>
+let root = null;
+
+// ── DIRECT PDF (CLEAN EXPORT) ──
+async function directDownloadPDF() {
+  const code = document.getElementById('in-code').value;
+  if (!code) return toast("Paste your AI code first!");
+
+  const render = document.getElementById('print-render');
+  render.innerHTML = '';
+  render.style.display = 'flex';
+  
+  showTab('print');
+
+  const page = document.createElement('div');
+  page.className = 'a4-page';
+  page.innerHTML = code; // Only the code, no extra headers
+  render.appendChild(page);
+
+  toast("Preparing PDF...");
+  
+  // Wait for Google Fonts to load
+  setTimeout(() => {
+    window.print();
+  }, 800);
+}
+
+// ── FOLDER SYSTEM (DESKTOP) ──
+async function handleFolderClick() {
+  try {
+    root = await window.showDirectoryPicker({ mode: 'readwrite' });
+    document.getElementById('folder-btn').textContent = '✅ ' + root.name;
+    document.getElementById('folder-btn').classList.add('linked');
+    document.getElementById('btn-save').disabled = false;
+    refreshSubLists();
+    toast("Connected to " + root.name);
+  } catch(e) { 
+    toast("Folder access limited on mobile."); 
+  }
+}
+
+function showTab(t) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('on'));
+  document.querySelectorAll('.tab').forEach(tb => tb.classList.remove('on'));
+  document.getElementById('screen-' + t).classList.add('on');
+  document.getElementById('tab-' + t).classList.add('on');
+  
+  const render = document.getElementById('print-render');
+  render.style.display = (t === 'print' ? 'flex' : 'none');
+  
+  if(t === 'lib') refreshLib();
+  if(t === 'print') refreshSubLists();
+}
+
+async function saveNote() {
+  const sub = document.getElementById('in-sub').value || 'Unsorted';
+  const chap = document.getElementById('in-chap').value || 'General';
+  const title = document.getElementById('in-title').value || 'Note_' + Date.now();
+  const code = document.getElementById('in-code').value;
+  
+  const fname = title.replace(/\s+/g, '_') + '.html';
+  try {
+    const sd = await root.getDirectoryHandle(sub, {create:true});
+    const cd = await sd.getDirectoryHandle(chap, {create:true});
+    const fh = await cd.getFileHandle(fname, {create:true});
+    const w = await fh.createWritable();
+    await w.write(code);
+    await w.close();
+    toast("✓ Saved Successfully");
+  } catch(e) {
+    toast("Error saving file.");
+  }
+}
+
+async function refreshLib() {
+  if(!root) return;
+  let html = '';
+  for await (const sub of root.values()) {
+    if(sub.kind !== 'directory') continue;
+    html += `<h3 style="margin:25px 0 10px; color:var(--accent); font-size:12px; text-transform:uppercase;">${sub.name}</h3>`;
+    const subDir = await root.getDirectoryHandle(sub.name);
+    for await (const chap of subDir.values()) {
+        if(chap.kind !== 'directory') continue;
+        const chapDir = await subDir.getDirectoryHandle(chap.name);
+        for await (const file of chapDir.values()) {
+            html += `<div class="note-item" onclick="openFile('${sub.name}','${chap.name}','${file.name}')">
+                <span class="note-name">${chap.name} : ${file.name.replace('.html','').replace(/_/g,' ')}</span>
+            </div>`;
+        }
+    }
+  }
+  document.getElementById('lib-content').innerHTML = html || 'Library is empty.';
+}
+
+async function openFile(s, c, n) {
+  const sd = await root.getDirectoryHandle(s);
+  const cd = await sd.getDirectoryHandle(c);
+  const fh = await cd.getFileHandle(n);
+  const text = await (await fh.getFile()).text();
+  document.getElementById('view-content').innerHTML = text;
+  document.getElementById('tab-view').style.display = 'flex';
+  showTab('view');
+}
+
+async function buildPrint() {
+  const sub = document.getElementById('pr-sub').value;
+  const chap = document.getElementById('pr-chap').value;
+  if(!sub) return toast("Select a subject");
+  
+  const render = document.getElementById('print-render');
+  render.innerHTML = '';
+  render.style.display = 'flex';
+
+  const subDir = await root.getDirectoryHandle(sub);
+  for await (const c of subDir.values()) {
+    if(c.kind !== 'directory') continue;
+    if(chap && c.name !== chap) continue;
+    
+    const cd = await subDir.getDirectoryHandle(c.name);
+    let page = document.createElement('div');
+    page.className = 'a4-page';
+    
+    for await (const f of cd.values()) {
+        const text = await (await f.getFile()).text();
+        page.innerHTML += `<div style="margin-bottom:50px; page-break-inside:avoid;">${text}</div>`;
+    }
+    render.appendChild(page);
+  }
+  toast("Preview Ready!");
+}
+
+async function refreshSubLists() {
+  if(!root) return;
+  const dl = document.getElementById('dl-sub');
+  const pr = document.getElementById('pr-sub');
+  dl.innerHTML = '';
+  pr.innerHTML = '<option value="">Choose Subject</option>';
+  for await (const e of root.values()) {
+    if(e.kind === 'directory') {
+        dl.innerHTML += `<option value="${e.name}">`;
+        pr.innerHTML += `<option value="${e.name}">${e.name}</option>`;
+    }
+  }
+}
+
+async function loadChaps() {
+    const sub = document.getElementById('in-sub').value;
+    if(!root || !sub) return;
+    try {
+        const dl = document.getElementById('dl-chap');
+        dl.innerHTML = '';
+        const sd = await root.getDirectoryHandle(sub);
+        for await (const e of sd.values()) if(e.kind === 'directory') dl.innerHTML += `<option value="${e.name}">`;
+    } catch(e) {}
+}
+
+async function loadPrChaps() {
+    const sub = document.getElementById('pr-sub').value;
+    const sel = document.getElementById('pr-chap');
+    sel.innerHTML = '<option value="">All Chapters</option>';
+    try {
+        const sd = await root.getDirectoryHandle(sub);
+        for await (const e of sd.values()) if(e.kind === 'directory') sel.innerHTML += `<option value="${e.name}">${e.name}</option>`;
+    } catch(e) {}
+}
+
+function toast(m) {
+  const t = document.getElementById('toast');
+  t.textContent = m; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+</script>
 </body>
 </html>
